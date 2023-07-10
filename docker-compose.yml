@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  app-delivery:
+    container_name: app-delivery
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    command: npm run dev
+    restart: always
+    depends_on: 
+      - delivery-db
+    links:
+      - delivery-db
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/app
+    networks:
+      - app-network
+
+  delivery-db:
+    container_name: delivery-db
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+      PGDATA: ./data/postgres
+      POSTGRES_DB: delivery
+    ports:
+      - "5432:5432"
+    volumes:
+       - ./data:/data/postgres
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+    data:
+    app-delivery:
